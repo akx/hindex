@@ -1,5 +1,4 @@
 import re
-from typing import Optional
 
 import attr
 
@@ -28,9 +27,8 @@ class TermWithContext(Term):
         doc_id: str,
     ) -> "TermWithContext":
         if context_length > 0:
-            start = match.start(0)
+            start, end = match.span()
             before_start = max(0, start - context_length)
-            end = match.end(0)
             after_end = end + context_length
             before = source[before_start:start]
             after = source[end:after_end]

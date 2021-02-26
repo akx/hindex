@@ -63,7 +63,7 @@ def main(input_dirs, out_dir, context_length):
 
     index_json = {
         "terms": {},
-        "docs": doc_id_to_num_id,
+        "docs": {num_id: doc_id for doc_id, num_id in doc_id_to_num_id.items()},
     }
     subs = defaultdict(lambda: {"terms": {}})
     terms: Iterable[TermWithContext]
@@ -78,9 +78,10 @@ def main(input_dirs, out_dir, context_length):
         ]
         subs[sub_id]["terms"][norm_term] = [
             {
-                "doc_id": doc_id_to_num_id[term.doc_id],
+                "doc": doc_id_to_num_id[term.doc_id],
+                "orig": term.original,
                 "snippet": [term.before, term.text, term.after]
-                if (term.before and term.after)
+                if (term.before or term.after)
                 else [],
             }
             for term in terms
