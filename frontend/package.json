@@ -1,0 +1,14 @@
+{
+  "dependencies": {
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "swr": "^0.4.2"
+  },
+  "devDependencies": {
+    "esbuild": "^0.8.52",
+    "prettier": "^2.2.1"
+  },
+  "scripts": {
+    "build": "esbuild src/search.jsx --minify --bundle --target=chrome58,firefox57,safari11,edge16 --outfile=../out/search.js --define:process.env.NODE_ENV=\\\"production\\\""
+  }
+}

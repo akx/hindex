@@ -1,3 +1,5 @@
 *.py[cod]
 input
 out/data
+frontend/dist
+node_modules
