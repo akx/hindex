@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <script src="https://unpkg.com/mithril/mithril.js"></script>
+</head>
+<body>
+<script>
+  var root = document.body;
+  let terms = {};
+  let docMap = {};
+  let search = "";
+  const subs = {};
+
+  function loadSub(subId) {
+    const promise = fetch(`data/${subId}.json`);
+    const subObj = {
+      promise,
+      data: null,
+    };
+    promise.then(async (resp) => {
+      subObj.data = await resp.json();
+    });
+    subs[subId] = subObj;
+    return promise;
+  }
+
+  const Ui = {
+    view: () => {
+      const matchingTerms = {};
+      if (search.length) {
+        for (let term in terms) {
+          const td = terms[term];
+          const [sub, nd, nt, vars] = td;
+          if (term.startsWith(search) || vars.some(v => v.startsWith(search))) {
+            matchingTerms[term] = td;
+            if(!subs[sub]) {
+              loadSub(sub).then(() => m.redraw(true));
+            }
+          }
+        }
+      }
+      return m("div", [
+        m("div", `${Object.keys(terms).length} terms`),
+        m("div", `${Object.keys(docMap).length} documents`),
+        m("input", {value: search, type: 'search', oninput: (e) => search = e.target.value}),
+        m("ul", Object.keys(matchingTerms).map(termName => {
+          const termInfo = matchingTerms[termName];
+          const sub = subs[termInfo[0]];
+          let matchDiv = null;
+          if(sub && sub.data && sub.data.terms[termName]) {
+            const occurrences = sub.data.terms[termName];
+            matchDiv = m("ul", occurrences.map(occ => m("li", occ.snippet.join(" "))));
+          }
+          return m("li", [
+            m("div", termName),
+            matchDiv,
+          ]);
+        })),
+      ]);
+    },
+  }
+
+  async function boot() {
+    m.render(root, m("div", "Loading search index"));
+    const resp = await fetch("data/index.json");
+    const index = await resp.json();
+    terms = index.terms;
+    docMap = index.docs;
+    m.mount(root, Ui);
+  }
+
+  boot()
+</script>
+</body>
+</html>
